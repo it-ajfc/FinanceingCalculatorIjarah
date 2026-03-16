@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>حاسبة القسط الشهري والأهلية التمويلية</title>
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --card: #ffffff;
+      --text: #162033;
+      --muted: #6b7280;
+      --border: #d9e0ea;
+      --accent: #0f766e;
+      --accent-soft: #dff5f2;
+      --warn: #b45309;
+      --warn-soft: #fff7ed;
+      --bad: #b91c1c;
+      --bad-soft: #fef2f2;
+      --good: #166534;
+      --good-soft: #f0fdf4;
+      --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+      background: linear-gradient(180deg, #f8fafc 0%, #eef4ff 100%);
+      color: var(--text);
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .hero {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 24px;
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+    }
+
+    .hero h1 {
+      margin: 0 0 8px;
+      font-size: 32px;
+    }
+
+    .hero p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 20px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 20px;
+    }
+
+    .card h2 {
+      margin: 0 0 16px;
+      font-size: 22px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .field.full {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      font-size: 14px;
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    input, select {
+      width: 100%;
+      height: 48px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 0 14px;
+      font-size: 15px;
+      background: #fff;
+      color: var(--text);
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.12);
+    }
+
+    .hint {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 18px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      border: 0;
+      border-radius: 14px;
+      height: 46px;
+      padding: 0 18px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .primary {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .secondary {
+      background: #eef2f7;
+      color: var(--text);
+    }
+
+    .summary {
+      display: grid;
+      gap: 12px;
+    }
+
+    .metric {
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 14px 16px;
+      background: #fbfdff;
+    }
+
+    .metric .title {
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 6px;
+    }
+
+    .metric .value {
+      font-size: 24px;
+      font-weight: 800;
+    }
+
+    .status {
+      padding: 16px;
+      border-radius: 16px;
+      font-weight: 700;
+      line-height: 1.8;
+      border: 1px solid transparent;
+    }
+
+    .eligible {
+      background: var(--good-soft);
+      color: var(--good);
+      border-color: #bbf7d0;
+    }
+
+    .warning {
+      background: var(--warn-soft);
+      color: var(--warn);
+      border-color: #fed7aa;
+    }
+
+    .rejected {
+      background: var(--bad-soft);
+      color: var(--bad);
+      border-color: #fecaca;
+    }
+
+    .breakdown {
+      margin-top: 18px;
+      border-top: 1px solid var(--border);
+      padding-top: 16px;
+    }
+
+    .row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px dashed #e5e7eb;
+      font-size: 15px;
+    }
+
+    .row:last-child {
+      border-bottom: 0;
+    }
+
+    .row strong {
+      font-size: 17px;
+    }
+
+    .note {
+      margin-top: 14px;
+      padding: 14px;
+      background: #f8fafc;
+      border-radius: 14px;
+      color: var(--muted);
+      line-height: 1.8;
+      font-size: 13px;
+      border: 1px solid var(--border);
+    }
+
+    @media (max-width: 900px) {
+      .grid { grid-template-columns: 1fr; }
+      .form-grid { grid-template-columns: 1fr; }
+      .hero h1 { font-size: 26px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <section class="hero">
+      <h1>حاسبة القسط الشهري والأهلية التمويلية</h1>
+      <p>
+        أدخل بيانات العميل وبيانات المركبة ليتم احتساب العمر، مدة العمل، الضريبة، الرسوم، التأمين، الدفعة الأخيرة،
+        ثم استخراج قيمة القسط الشهري مع التحقق من شروط الأهلية.
+      </p>
+    </section>
+
+    <div class="grid">
+      <section class="card">
+        <h2>المدخلات</h2>
+        <div class="form-grid">
+          <div class="field">
+            <label for="netIncome">صافي الدخل الشهري (ريال)</label>
+            <input id="netIncome" type="number" min="0" step="0.01" value="8000" />
+          </div>
+
+          <div class="field">
+            <label for="dob">تاريخ الميلاد</label>
+            <input id="dob" type="date" value="1990-01-01" />
+          </div>
+
+          <div class="field">
+            <label for="employmentDate">تاريخ مزاولة العمل</label>
+            <input id="employmentDate" type="date" value="2024-01-01" />
+          </div>
+
+          <div class="field">
+            <label for="sector">قطاع العمل</label>
+            <select id="sector">
+              <option value="government">حكومي</option>
+              <option value="private">خاص</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="carPriceExVat">سعر السيارة بدون ضريبة (ريال)</label>
+            <input id="carPriceExVat" type="number" min="0" step="0.01" value="100000" />
+          </div>
+
+          <div class="field">
+            <label for="downPayment">الدفعة الأولى (ريال)</label>
+            <input id="downPayment" type="number" min="0" step="0.01" value="20000" />
+            <div class="hint">يتم خصمها كما تم إدخالها. إذا كانت سياستكم تعتبرها شاملة الضريبة فأدخل القيمة الشاملة.</div>
+          </div>
+
+          <div class="field">
+            <label for="plateFees">رسوم اللوحات (ريال)</label>
+            <input id="plateFees" type="number" min="0" step="0.01" value="500" />
+          </div>
+
+          <div class="field">
+            <label for="energyFees">رسوم استهلاك طاقة (ريال)</label>
+            <input id="energyFees" type="number" min="0" step="0.01" value="0" />
+          </div>
+
+          <div class="field">
+            <label for="finalPaymentPercent">نسبة الدفعة الأخيرة</label>
+            <select id="finalPaymentPercent">
+              <option value="0">0%</option>
+              <option value="10">10%</option>
+              <option value="20">20%</option>
+              <option value="30" selected>30%</option>
+              <option value="40">40%</option>
+              <option value="50">50%</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="finalPaymentBase">أساس احتساب الدفعة الأخيرة</label>
+            <select id="finalPaymentBase">
+              <option value="financeAmount">من مبلغ التمويل</option>
+              <option value="carPriceWithVat" selected>من قيمة السيارة شامل الضريبة</option>
+            </select>
+          </div>
+
+          <div class="field full">
+            <label for="financeMonths">مدة التمويل (بالأشهر)</label>
+            <input id="financeMonths" type="number" min="1" step="1" value="36" />
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="primary" onclick="calculate()">احسب الآن</button>
+          <button class="secondary" onclick="resetForm()">إعادة تعيين</button>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>النتيجة</h2>
+        <div id="statusBox" class="status warning">أدخل البيانات ثم اضغط على "احسب الآن".</div>
+
+        <div class="summary" style="margin-top:16px;">
+          <div class="metric">
+            <div class="title">العمر</div>
+            <div class="value" id="ageValue">-</div>
+          </div>
+          <div class="metric">
+            <div class="title">مدة العمل</div>
+            <div class="value" id="employmentMonthsValue">-</div>
+          </div>
+          <div class="metric">
+            <div class="title">قيمة الدفعة الأخيرة</div>
+            <div class="value" id="finalPaymentValue">-</div>
+          </div>
+          <div class="metric">
+            <div class="title">القسط الشهري</div>
+            <div class="value" id="monthlyInstallmentValue">-</div>
+          </div>
+        </div>
+
+        <div class="breakdown" id="breakdown"></div>
+
+        <div class="note">
+          الرسوم الإدارية = 0.5% × (قيمة السيارة شامل الضريبة + رسوم اللوحات)<br>
+          التأمين = 3.5% × قيمة السيارة شامل الضريبة<br>
+          مبلغ التمويل الأساسي = قيمة السيارة شامل الضريبة - الدفعة الأولى - الدفعة الأخيرة<br>
+          القسط الشهري = مبلغ التمويل الأساسي ÷ مدة التمويل بالأشهر
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    function num(id) {
+      return parseFloat(document.getElementById(id).value) || 0;
+    }
+
+    function fmt(value) {
+      return new Intl.NumberFormat('ar-SA', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }).format(value) + ' ريال';
+    }
+
+    function calculateAgeYears(dateStr) {
+      if (!dateStr) return 0;
+      const today = new Date();
+      const birthDate = new Date(dateStr);
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const m = today.getMonth() - birthDate.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
+      return age;
+    }
+
+    function calculateEmploymentMonths(dateStr) {
+      if (!dateStr) return 0;
+      const today = new Date();
+      const start = new Date(dateStr);
+      let months = (today.getFullYear() - start.getFullYear()) * 12;
+      months += today.getMonth() - start.getMonth();
+      if (today.getDate() < start.getDate()) months--;
+      return Math.max(0, months);
+    }
+
+    function setStatus(message, type) {
+      const box = document.getElementById('statusBox');
+      box.className = 'status ' + type;
+      box.innerHTML = message;
+    }
+
+    function calculate() {
+      const netIncome = num('netIncome');
+      const dob = document.getElementById('dob').value;
+      const employmentDate = document.getElementById('employmentDate').value;
+      const sector = document.getElementById('sector').value;
+      const carPriceExVat = num('carPriceExVat');
+      const downPayment = num('downPayment');
+      const plateFees = num('plateFees');
+      const energyFees = num('energyFees');
+      const finalPaymentPercent = num('finalPaymentPercent');
+      const finalPaymentBase = document.getElementById('finalPaymentBase').value;
+      const financeMonths = num('financeMonths');
+
+      const age = calculateAgeYears(dob);
+      const employmentMonths = calculateEmploymentMonths(employmentDate);
+      const vat = carPriceExVat * 0.15;
+      const carPriceWithVat = carPriceExVat + vat;
+      const adminFees = (carPriceWithVat + plateFees) * 0.005;
+      const insurance = carPriceWithVat * 0.035;
+
+      let preliminaryFinanceAmount = Math.max(carPriceWithVat - downPayment, 0);
+      let finalPayment = 0;
+
+      if (finalPaymentBase === 'financeAmount') {
+        finalPayment = preliminaryFinanceAmount * (finalPaymentPercent / 100);
+      } else {
+        finalPayment = carPriceWithVat * (finalPaymentPercent / 100);
+      }
+
+      const baseFinanceAmount = Math.max(carPriceWithVat - downPayment - finalPayment, 0);
+      const monthlyInstallment = financeMonths > 0 ? (baseFinanceAmount / financeMonths) : 0;
+      const totalCostWithFees = carPriceWithVat + plateFees + energyFees + adminFees + insurance;
+
+      const conditions = [];
+      const failures = [];
+
+      const salaryOk = netIncome > 3500;
+      conditions.push(`الراتب ${salaryOk ? 'محقق' : 'غير محقق'}: ${fmt(netIncome)}`);
+      if (!salaryOk) failures.push('صافي الدخل يجب أن يكون أعلى من 3,500 ريال');
+
+      const ageOk = age >= 21 && age <= 70;
+      conditions.push(`العمر ${ageOk ? 'محقق' : 'غير محقق'}: ${age} سنة`);
+      if (!ageOk) failures.push('العمر يجب أن يكون بين 21 و70 سنة');
+
+      let employmentOk = false;
+      if (sector === 'government') {
+        employmentOk = employmentMonths >= 1;
+        conditions.push(`مدة العمل للحكومي ${employmentOk ? 'محققة' : 'غير محققة'}: ${employmentMonths} شهر`);
+        if (!employmentOk) failures.push('للقطاع الحكومي مدة مزاولة العمل يجب أن تكون شهرًا فأكثر');
+      } else {
+        employmentOk = employmentMonths >= 3;
+        conditions.push(`مدة العمل للخاص ${employmentOk ? 'محققة' : 'غير محققة'}: ${employmentMonths} شهر`);
+        if (!employmentOk) failures.push('للقطاع الخاص مدة مزاولة العمل يجب أن تكون 3 أشهر فأكثر');
+      }
+
+      const eligible = salaryOk && ageOk && employmentOk;
+
+      document.getElementById('ageValue').textContent = age ? (age + ' سنة') : '-';
+      document.getElementById('employmentMonthsValue').textContent = employmentMonths + ' شهر';
+      document.getElementById('finalPaymentValue').textContent = fmt(finalPayment);
+      document.getElementById('monthlyInstallmentValue').textContent = fmt(monthlyInstallment);
+
+      if (eligible) {
+        setStatus('العميل <strong>مؤهل مبدئيًا</strong> بحسب الشروط المدخلة.', 'eligible');
+      } else {
+        setStatus('العميل <strong>غير مؤهل مبدئيًا</strong>.<br>' + failures.join('<br>'), 'rejected');
+      }
+
+      document.getElementById('breakdown').innerHTML = `
+        <div class="row"><span>صافي الدخل</span><strong>${fmt(netIncome)}</strong></div>
+        <div class="row"><span>قيمة السيارة بدون ضريبة</span><strong>${fmt(carPriceExVat)}</strong></div>
+        <div class="row"><span>الضريبة 15%</span><strong>${fmt(vat)}</strong></div>
+        <div class="row"><span>قيمة السيارة شامل الضريبة</span><strong>${fmt(carPriceWithVat)}</strong></div>
+        <div class="row"><span>الدفعة الأولى</span><strong>${fmt(downPayment)}</strong></div>
+        <div class="row"><span>رسوم اللوحات</span><strong>${fmt(plateFees)}</strong></div>
+        <div class="row"><span>رسوم استهلاك طاقة</span><strong>${fmt(energyFees)}</strong></div>
+        <div class="row"><span>الرسوم الإدارية 0.5%</span><strong>${fmt(adminFees)}</strong></div>
+        <div class="row"><span>التأمين 3.5%</span><strong>${fmt(insurance)}</strong></div>
+        <div class="row"><span>إجمالي التكلفة مع الرسوم</span><strong>${fmt(totalCostWithFees)}</strong></div>
+        <div class="row"><span>نسبة الدفعة الأخيرة</span><strong>${finalPaymentPercent.toFixed(0)}%</strong></div>
+        <div class="row"><span>أساس الدفعة الأخيرة</span><strong>${finalPaymentBase === 'financeAmount' ? 'من مبلغ التمويل' : 'من قيمة السيارة شامل الضريبة'}</strong></div>
+        <div class="row"><span>مبلغ التمويل الأساسي</span><strong>${fmt(baseFinanceAmount)}</strong></div>
+        <div class="row"><span>مدة التمويل</span><strong>${financeMonths} شهر</strong></div>
+        <div class="row"><span>القسط الشهري</span><strong>${fmt(monthlyInstallment)}</strong></div>
+      `;
+    }
+
+    function resetForm() {
+      document.getElementById('netIncome').value = 8000;
+      document.getElementById('dob').value = '1990-01-01';
+      document.getElementById('employmentDate').value = '2024-01-01';
+      document.getElementById('sector').value = 'government';
+      document.getElementById('carPriceExVat').value = 100000;
+      document.getElementById('downPayment').value = 20000;
+      document.getElementById('plateFees').value = 500;
+      document.getElementById('energyFees').value = 0;
+      document.getElementById('finalPaymentPercent').value = 30;
+      document.getElementById('finalPaymentBase').value = 'carPriceWithVat';
+      document.getElementById('financeMonths').value = 36;
+      document.getElementById('ageValue').textContent = '-';
+      document.getElementById('employmentMonthsValue').textContent = '-';
+      document.getElementById('finalPaymentValue').textContent = '-';
+      document.getElementById('monthlyInstallmentValue').textContent = '-';
+      document.getElementById('breakdown').innerHTML = '';
+      setStatus('أدخل البيانات ثم اضغط على "احسب الآن".', 'warning');
+    }
+
+    calculate();
+  </script>
+</body>
+</html>
